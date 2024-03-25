@@ -19,7 +19,7 @@ public class GroupServiceImpl implements GroupService {
     // 替换GitHub 的组织名，令牌，仓库
     private String orgName = "COMP5241-2324-Project";
     private String reposName = "project-group4";
-    private String url = "https://api.github.com/repos/" + orgName + "/" + reposName + "/commits";
+    private String url1 = "https://api.github.com/repos/" + orgName + "/" + reposName + "/commits";
     //private String oauthToken = "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";
 
     @Override
@@ -27,7 +27,7 @@ public class GroupServiceImpl implements GroupService {
         String commitsJson = null;
         try(CloseableHttpClient client = HttpClients.createDefault()){
             // 创建一个HttpGet请求，用于获取仓库的提交信息
-            HttpGet request = new HttpGet(url);
+            HttpGet request = new HttpGet(url1);
 //            request.addHeader("Authorization","token " + oauthToken);
             try(CloseableHttpResponse response = client.execute(request)){
                 // 将响应体转换为字符串
@@ -53,4 +53,7 @@ public class GroupServiceImpl implements GroupService {
         }
         return commitsJson;
     }
+    GroupService groupService = new GroupServiceImpl();
+    String result = groupService.getGroupCommits();
+    System.out.println(result); // Fix: Removed the period after System.out and added a semicolon at the end.
 }
