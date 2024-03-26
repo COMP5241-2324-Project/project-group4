@@ -7,6 +7,8 @@ public interface GroupService {
     String getGroupIssues();
     String getGroupPulls();
     String getGroupMilestones();
-    String getGroupNotifications ();
+    String getGroupAssignees();
     String getGroupProjects();
+
+
 }

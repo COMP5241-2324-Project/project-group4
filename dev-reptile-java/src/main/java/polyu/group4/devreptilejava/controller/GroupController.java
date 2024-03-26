@@ -22,5 +22,8 @@ public class GroupController {
     public String getGroupIssues(){return groupService.getGroupIssues(); }
     @GetMapping("/pulls")
     public String getGroupPulls(){return groupService.getGroupPulls(); }
-
+    @GetMapping("/milestones")
+    public String getGroupMilestones(){return groupService.getGroupMilestones(); }
+    @GetMapping("/assignees")
+    public String getGroupAssignees(){return groupService.getGroupAssignees(); }
 }
