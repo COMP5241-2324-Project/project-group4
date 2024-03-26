@@ -13,8 +13,14 @@ public class GroupController {
     @Autowired
     private GroupService groupService;
 
+//    第三步，模仿下面的两行写两行
     @GetMapping("/commits")
     public String getGroupCommits(){
         return groupService.getGroupCommits();
     }
+    @GetMapping("/issues")
+    public String getGroupIssues(){return groupService.getGroupIssues(); }
+    @GetMapping("/pulls")
+    public String getGroupPulls(){return groupService.getGroupPulls(); }
+
 }
