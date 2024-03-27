@@ -10,8 +10,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import polyu.group4.devreptilejava.entity.MessageEntity;
-import polyu.group4.devreptilejava.entity.PersonEntity;
+import polyu.group4.devreptilejava.entity.*;
 import polyu.group4.devreptilejava.service.GroupService;
 
 import java.io.IOException;
@@ -25,15 +24,14 @@ public class GroupServiceImpl implements GroupService {
     private String orgName = "COMP5241-2324-Project";
     private String reposName = "project-group4";
     private String url = "https://api.github.com/repos/" + orgName + "/" + reposName;
-
-    private String url2 = "https://api.github.com/repos/" + orgName + "/" + reposName + "/issues";
-    //  66666 assigned issues
-    private String url6 = "https://api.github.com/repos/" + orgName + "/" + reposName + "/assignees";
-    //    77777 pull requests
-    private String url7 = "https://api.github.com/repos/" + orgName + "/" + reposName + "/pulls";
     //    88888 milestones
     private String url8 = "https://api.github.com/repos/" + orgName + "/" + reposName + "/milestones";
 
+    @Autowired
+    private GroupEntity myGroup;
+
+    @Autowired
+    private Map<String, PersonEntity> groupNumbers;
 
     @Override
     public String getGroupCommits() {
@@ -42,6 +40,8 @@ public class GroupServiceImpl implements GroupService {
         // 创建一个Map来存储人名和对应的entity
         Map<String, PersonEntity> commitPersons = new HashMap<String, PersonEntity>();
         // 创建一个ObjectMapper来解析JSON数据
+
+        Integer allCommits = 0;
         ObjectMapper mapper = new ObjectMapper();
         for (String name : branchName) {
             String branchUrl = "https://api.github.com/repos/" + orgName + "/" + reposName + "/commits?sha=" + name;
@@ -69,6 +69,7 @@ public class GroupServiceImpl implements GroupService {
                             // 判断当前Map中是否已经有了该author
                             PersonEntity person = commitPersons.get(authorName);
                             if (!"github-classroom[bot]".equals(authorName)) {
+                                allCommits++;
                                 // 如果已经有了该author，那么则仅需要更新message列表，和增加commit次数
                                 if (null != person) {
                                     person.getCommits().add(newCommit);
@@ -84,11 +85,26 @@ public class GroupServiceImpl implements GroupService {
                         }
                     }
                     commitsJson = mapper.writeValueAsString(commitPersons);
+
+                    for (Map.Entry<String, PersonEntity> entry : commitPersons.entrySet()) {
+                        String id = entry.getKey();
+                        PersonEntity value = entry.getValue();
+                        PersonEntity person = groupNumbers.get(id);
+                        if (person == null) {
+                            PersonEntity newPerson = new PersonEntity();
+                            newPerson.setCommitsCount(value.getCommitsCount());
+                            groupNumbers.put(id, newPerson);
+                        } else {
+                            person.setCommitsCount(value.getCommitsCount());
+                            groupNumbers.put(id, person);
+                        }
+                    }
                 }
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
         }
+        myGroup.setCommitsCount(allCommits);
         return commitsJson;
     }
 
@@ -99,6 +115,7 @@ public class GroupServiceImpl implements GroupService {
         Map<String, PersonEntity> commentPerson = new HashMap<String, PersonEntity>();
         // 创建一个ObjectMapper来解析JSON数据
         ObjectMapper mapper = new ObjectMapper();
+        Integer allComments = 0;
         String commentUrl = url + "/issues/comments";
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             // 创建一个HttpGet请求，用于获取仓库的提交信息
@@ -117,6 +134,7 @@ public class GroupServiceImpl implements GroupService {
                         MessageEntity newComment = new MessageEntity(message, commitDate);
                         // 判断当前Map中是否已经有了该author
                         PersonEntity person = commentPerson.get(name);
+                        allComments++;
                         if (null != person) {
                             person.getComments().add(newComment);
                             person.setCommentsCount(person.getCommentsCount() + 1);
@@ -132,11 +150,25 @@ public class GroupServiceImpl implements GroupService {
                         }
                     }
                 }
+                for (Map.Entry<String, PersonEntity> entry : commentPerson.entrySet()) {
+                    String id = entry.getKey();
+                    PersonEntity value = entry.getValue();
+                    PersonEntity person = groupNumbers.get(id);
+                    if (person == null) {
+                        PersonEntity newPerson = new PersonEntity();
+                        newPerson.setCommitsCount(value.getCommentsCount());
+                        groupNumbers.put(id, newPerson);
+                    } else {
+                        person.setCommentsCount(value.getCommentsCount());
+                        groupNumbers.put(id, person);
+                    }
+                }
                 commitsJson = mapper.writeValueAsString(commentPerson);
             }
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
+        myGroup.setCommentsCount(allComments);
         return commitsJson;
     }
 
@@ -163,121 +195,146 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public String getGroupIssues() {
-        String issuesJson = null;
+        String commitsJson = null;
+        // 创建一个Map来存储人名和对应的entity
+        Map<String, PersonEntity> commentPerson = new HashMap<String, PersonEntity>();
+        // 创建一个ObjectMapper来解析JSON数据
+        ObjectMapper mapper = new ObjectMapper();
+        String issueUrl = url + "/issues";
+        Integer allIssues = 0;
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            // 创建一个HttpGet请求，用于获取仓库的问题信息
-            HttpGet request = new HttpGet(url2);
-            // request.addHeader("Authorization", "token " + oauthToken);
+            // 创建一个HttpGet请求，用于获取仓库的提交信息
+            HttpGet request = new HttpGet(issueUrl);
             try (CloseableHttpResponse response = client.execute(request)) {
-                // 将响应体转换为字符串
                 String responseBody = EntityUtils.toString(response.getEntity());
-                // 创建一个ObjectMapper来解析JSON数据
-                ObjectMapper mapper = new ObjectMapper();
-                // 将响应体解析为一个列表，每个元素包含一个问题信息的Map
-                List<Map<String, Object>> issues = mapper.readValue(
-                        responseBody,
-                        TypeFactory.defaultInstance().constructCollectionType(List.class, Map.class)
-                );
-                // 创建一个Map来存储每个用户的问题计数和问题详情
-                Map<String, Object> stats = new HashMap<>();
-                Map<String, Integer> userIssueCount = new HashMap<>();
+                List<Map<String, Object>> issues = mapper.readValue(responseBody, List.class);
                 for (Map<String, Object> issue : issues) {
-                    // 统计每个用户的issue数量
-                    Map<String, Object> user = (Map<String, Object>) issue.get("user");
-                    String userName = (String) user.get("login");
-                    userIssueCount.put(userName, userIssueCount.getOrDefault(userName, 0) + 1);
-
-                    // 提取其他相关数据
-                    String issueNumber = issue.get("number").toString();
-                    String issueTitle = (String) issue.get("title");
-                    String issueState = (String) issue.get("state");
-                    String createdAt = (String) issue.get("created_at");
-                    String updatedAt = (String) issue.get("updated_at");
-                    int comments = (int) issue.get("comments");
-                    Map<String, Integer> reactions = (Map<String, Integer>) issue.get("reactions");
-                    List<Map<String, Object>> labels = (List<Map<String, Object>>) issue.get("labels");
-                    Map<String, Object> assignee = (Map<String, Object>) issue.get("assignee");
-
-                    Map<String, Object> issueDetails = new HashMap<>();
-                    issueDetails.put("number", issueNumber);
-                    issueDetails.put("title", issueTitle);
-                    issueDetails.put("state", issueState);
-                    issueDetails.put("created_at", createdAt);
-                    issueDetails.put("updated_at", updatedAt);
-                    issueDetails.put("comments", comments);
-                    issueDetails.put("reactions", reactions);
-                    issueDetails.put("labels", labels);
-                    issueDetails.put("assignee", assignee);
-
-                    // 将每个issue的详细信息添加到统计信息中
-                    stats.put(issueNumber, issueDetails);
+                    Map<String, Object> commentUser = (Map<String, Object>) issue.get("user");
+                    if (commentUser != null) {
+                        String name = (String) commentUser.get("login");
+                        String message = (String) issue.get("body");
+                        Integer commentCount = (Integer) issue.get("comments");
+                        String title = (String) issue.get("title");
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                        Date issueDate = formatter.parse((String) issue.get("updated_at"));
+                        // 将活动信息和活动时间放入Entity中
+                        IssueMessage issueMessage = new IssueMessage();
+                        issueMessage.setTitle(title);
+                        issueMessage.setComments(commentCount);
+                        issueMessage.setMessage(message);
+                        issueMessage.setDate(issueDate);
+                        // 判断当前Map中是否已经有了该author
+                        PersonEntity person = commentPerson.get(name);
+                        allIssues++;
+                        if (null != person) {
+                            person.getIssues().add(issueMessage);
+                            person.setIssuesCount(person.getIssuesCount() + 1);
+                        } else {
+                            // 如果没有该author，那么则需要在Map中放入
+                            List<IssueMessage> messageList = new ArrayList<>();
+                            messageList.add(issueMessage);
+                            PersonEntity newPerson = new PersonEntity();
+                            newPerson.setName(name);
+                            newPerson.setIssues(messageList);
+                            newPerson.setIssuesCount(1);
+                            commentPerson.put(name, newPerson);
+                        }
+                    }
                 }
-                // 将用户问题计数和统计信息合并到一个JSON字符串
-                Map<String, Object> combinedDetails = new HashMap<>();
-                combinedDetails.put("issuesStats", stats);
-                combinedDetails.put("userIssueCount", userIssueCount);
-                issuesJson = mapper.writeValueAsString(combinedDetails);
+
+                for (Map.Entry<String, PersonEntity> entry : commentPerson.entrySet()) {
+                    String id = entry.getKey();
+                    PersonEntity value = entry.getValue();
+                    PersonEntity person = groupNumbers.get(id);
+                    if (person == null) {
+                        PersonEntity newPerson = new PersonEntity();
+                        newPerson.setIssuesCount(value.getIssuesCount());
+                        groupNumbers.put(id, newPerson);
+                    } else {
+                        person.setIssuesCount(value.getIssuesCount());
+                        groupNumbers.put(id, person);
+                    }
+                }
+
+                commitsJson = mapper.writeValueAsString(commentPerson);
             }
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
-        return issuesJson;
+        myGroup.setIssuesCount(allIssues);
+        return commitsJson;
     }
 
-    //写的第二个777777777777777777
     @Override
     public String getGroupPulls() {
-        String pullRequestJson = null;
+        String commitsJson = null;
+        // 创建一个Map来存储人名和对应的entity
+        Map<String, PersonEntity> pullsPerson = new HashMap<String, PersonEntity>();
+        // 创建一个ObjectMapper来解析JSON数据
+        ObjectMapper mapper = new ObjectMapper();
+        Integer allPulls = 0;
+        String pullsUrl = url + "/pulls";
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            // 创建一个HttpGet请求，用于获取仓库的拉取请求信息
-            HttpGet request = new HttpGet(url7); // 确保url7已经被设置为正确的GitHub API端点
+            // 创建一个HttpGet请求，用于获取仓库的提交信息
+            HttpGet request = new HttpGet(pullsUrl);
             try (CloseableHttpResponse response = client.execute(request)) {
-                // 将响应体转换成字符串
                 String responseBody = EntityUtils.toString(response.getEntity());
-                // 解析响应体中的 JSON 数据
-                ObjectMapper mapper = new ObjectMapper();
-                // 将响应体解析为 List<Map<String, Object>>
-                List<Map<String, Object>> pullRequests = mapper.readValue(responseBody, List.class);
-
-                List<Map<String, Object>> pullRequestInfos = new ArrayList<>();
-                for (Map<String, Object> pullRequest : pullRequests) {
-                    // 提取基本信息
-                    Map<String, Object> pullRequestInfo = new LinkedHashMap<>();//使用hashmap时候两个时间没有连在一起输出，改用linkedhashmap
-                    pullRequestInfo.put("title", pullRequest.get("title"));
-                    pullRequestInfo.put("state", pullRequest.get("state"));
-                    pullRequestInfo.put("created_at", pullRequest.get("created_at"));
-                    pullRequestInfo.put("updated_at", pullRequest.get("updated_at"));
-
-                    // 提取用户信息
-                    Map<String, Object> user = (Map<String, Object>) pullRequest.get("user");
-                    if (user != null) {
-                        pullRequestInfo.put("user.login", user.get("login"));
-                        pullRequestInfo.put("user.html_url", user.get("html_url"));
+                List<Map<String, Object>> pulls = mapper.readValue(responseBody, List.class);
+                for (Map<String, Object> pull : pulls) {
+                    Map<String, Object> pullUser = (Map<String, Object>) pull.get("user");
+                    if (pullUser != null) {
+                        String name = (String) pullUser.get("login");
+                        String message = (String) pull.get("body");
+                        String title = (String) pull.get("title");
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                        Date pullDate = formatter.parse((String) pull.get("updated_at"));
+                        // 将活动信息和活动时间放入Entity中
+                        PullMessage newPulls = new PullMessage();
+                        newPulls.setDate(pullDate);
+                        newPulls.setTitle(title);
+                        newPulls.setMessage(message);
+                        // 判断当前Map中是否已经有了该author
+                        PersonEntity person = pullsPerson.get(name);
+                        allPulls++;
+                        if (null != person) {
+                            person.getPulls().add(newPulls);
+                            person.setPullsCount(person.getPullsCount() + 1);
+                        } else {
+                            // 如果没有该author，那么则需要在Map中放入
+                            List<PullMessage> messageList = new ArrayList<PullMessage>();
+                            messageList.add(newPulls);
+                            PersonEntity newPerson = new PersonEntity();
+                            newPerson.setName(name);
+                            newPerson.setPulls(messageList);
+                            newPerson.setPullsCount(1);
+                            pullsPerson.put(name, newPerson);
+                        }
                     }
-
-                    // 提取代码变更概览
-                    if (pullRequest.containsKey("additions")) {
-                        pullRequestInfo.put("additions", pullRequest.get("additions"));
-                    }
-                    if (pullRequest.containsKey("deletions")) {
-                        pullRequestInfo.put("deletions", pullRequest.get("deletions"));
-                    }
-                    if (pullRequest.containsKey("changed_files")) {
-                        pullRequestInfo.put("changed_files", pullRequest.get("changed_files"));
-                    }
-
-                    pullRequestInfos.add(pullRequestInfo);
                 }
 
-                // 将 pullRequestInfo Map 转换为 JSON 字符串
-                pullRequestJson = mapper.writeValueAsString(pullRequestInfos);
+                for (Map.Entry<String, PersonEntity> entry : pullsPerson.entrySet()) {
+                    String id = entry.getKey();
+                    PersonEntity value = entry.getValue();
+                    PersonEntity person = groupNumbers.get(id);
+                    if (person == null) {
+                        PersonEntity newPerson = new PersonEntity();
+                        newPerson.setPullsCount(value.getPullsCount());
+                        groupNumbers.put(id, newPerson);
+                    } else {
+                        person.setIssuesCount(value.getPullsCount());
+                        groupNumbers.put(id, person);
+                    }
+                }
+
+                commitsJson = mapper.writeValueAsString(pullsPerson);
             }
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
-        return pullRequestJson;    }
+        myGroup.setPullsCount(allPulls);
+        return commitsJson;
+    }
 
-    //    写的第三个888888888888888888
     @Override
     public String getGroupMilestones() {
         String milestoneJson = null;
@@ -326,44 +383,95 @@ public class GroupServiceImpl implements GroupService {
         return milestoneJson;
     }
 
-    //    写的第四个66666
     @Override
-    public String getGroupAssignees() {
-        String assigneesJson = null;
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet(url6); // 确保url5已经被设置为正确的GitHub API端点
-            try (CloseableHttpResponse response = client.execute(request)) {
-                // 将响应体转换成字符串
-                String responseBody = EntityUtils.toString(response.getEntity());
-                // 解析响应体中的 JSON 数据
-                ObjectMapper mapper = new ObjectMapper();
-                // 将响应体解析为 List<Map<String, Object>>
-                List<Map<String, Object>> assignees = mapper.readValue(responseBody, List.class);
+    public String getALlGroups() {
+        String commitsJson = null;
+        ObjectMapper mapper = new ObjectMapper();
 
-                List<Map<String, Object>> assigneeInfos = new ArrayList<>();
-                for (Map<String, Object> assignee : assignees) {
-                    // 提取基本信息
-                    Map<String, Object> assigneeInfo = new HashMap<>();
-                    assigneeInfo.put("login", assignee.get("login"));
-                    assigneeInfo.put("id", assignee.get("id"));
-                    assigneeInfo.put("received_events_url", assignee.get("received_events_url"));
-                    assigneeInfo.put("type", assignee.get("type"));
-                    assigneeInfo.put("site_admin", assignee.get("site_admin"));
+        getGroupCommits();
+        getGroupIssues();
+        getGroupPulls();
+        getGroupComments();
 
-                    assigneeInfos.add(assigneeInfo);
-                }
-
-                // 将 assigneeInfo Map 转换为 JSON 字符串
-                assigneesJson = mapper.writeValueAsString(assigneeInfos);
+        List<GroupEntity> groups = new ArrayList<>();
+        for (int i = 1; i <= 8; i++) {
+            if (i == 4) {
+                myGroup.setName("Group4");
+                myGroup.setCount(5);
+                Integer score = myGroup.getCommentsCount() + myGroup.getCommitsCount() + myGroup.getIssuesCount() + myGroup.getPullsCount();
+                myGroup.setScore(score);
+                groups.add(myGroup);
+            } else {
+                GroupEntity group = new GroupEntity();
+                String name = "Group" + i;
+                group.setName(name);
+                Integer randomCount = 3 + (int) (Math.random() * ((10 - 3) + 1));
+                group.setCount(randomCount);
+                groups.add(group);
             }
-        } catch (IOException e) {
+        }
+        String myGroupUrl = url + "/commits/main";
+
+        GroupEntity myGroup = groups.get(3);
+        myGroup.setCount(5);
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet(myGroupUrl);
+            try (CloseableHttpResponse response = client.execute(request)) {
+                // 将响应体转换为字符串
+                String responseBody = EntityUtils.toString(response.getEntity());
+
+                Map<String, Object> latest = mapper.readValue(responseBody, Map.class);
+
+                Map<String, Object> commitAuthor = (Map<String, Object>) latest.get("commit");
+                Map<String, Object> author = (Map<String, Object>) commitAuthor.get("author");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                Date commitDate = formatter.parse((String) author.get("date"));
+                String message = (String) commitAuthor.get("message");
+                MessageEntity messageEntity = new MessageEntity();
+
+                messageEntity.setDate(commitDate);
+                messageEntity.setMessage(message);
+                myGroup.setLatestMessage(messageEntity);
+            }
+        } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
-        return assigneesJson;
+        // 最新的活动在最前面
+        try {
+            commitsJson = mapper.writeValueAsString(groups);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return commitsJson;
     }
 
     @Override
-    public String getGroupProjects() {
-        return null;
+    public String getGroupScore() {
+        String commitsJson = null;
+        ObjectMapper mapper = new ObjectMapper();
+        getGroupCommits();
+        getGroupIssues();
+        getGroupPulls();
+        getGroupComments();
+        groupNumbers.remove("personEntity");
+        for (Map.Entry<String, PersonEntity> entry : groupNumbers.entrySet()) {
+            String id = entry.getKey();
+            PersonEntity value = entry.getValue();
+            Integer score = Optional.ofNullable(value.getIssuesCount()).orElse(0)
+                    + Optional.ofNullable(value.getPullsCount()).orElse(0)
+                    + Optional.ofNullable(value.getCommitsCount()).orElse(0)
+                    + Optional.ofNullable(value.getCommentsCount()).orElse(0);
+            value.setScore(score);
+            groupNumbers.put(id, value);
+        }
+
+        try {
+            commitsJson = mapper.writeValueAsString(groupNumbers);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return commitsJson;
     }
+
+
 }

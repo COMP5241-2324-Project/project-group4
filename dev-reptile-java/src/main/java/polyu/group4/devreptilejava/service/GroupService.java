@@ -11,6 +11,8 @@ public interface GroupService {
     String getGroupIssues();
     String getGroupPulls();
     String getGroupMilestones();
-    String getGroupAssignees();
-    String getGroupProjects();
+
+    String getALlGroups();
+
+    String getGroupScore();
 }

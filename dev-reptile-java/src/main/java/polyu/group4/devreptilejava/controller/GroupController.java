@@ -19,10 +19,9 @@ public class GroupController {
     public String getGroupPulls(){return groupService.getGroupPulls(); }
     @GetMapping("/milestones")
     public String getGroupMilestones(){return groupService.getGroupMilestones(); }
-    @GetMapping("/assignees")
-    public String getGroupAssignees(){return groupService.getGroupAssignees(); }
 
-    
+
+
     @GetMapping("/commits")
     // 返回小组成员的commits
     public String getGroupCommits(){
@@ -32,4 +31,17 @@ public class GroupController {
     @GetMapping("/comments")
     // 返回小组成员的comments
     public String getGroupComments(){return groupService.getGroupComments();}
+
+
+    // 获得所有小组的信息，对应首页
+    @GetMapping("/all")
+    public String getAllGroup(){
+        return groupService.getALlGroups();
+    }
+
+    // 获得小组各个成员的得分情况
+    @GetMapping("/score")
+    public String getGroupScore(){
+        return groupService.getGroupScore();
+    }
 }

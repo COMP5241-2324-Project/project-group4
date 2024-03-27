@@ -16,6 +16,15 @@ public class PersonEntity {
     private Integer commentsCount;
     private List<MessageEntity> comments;
 
+    private Integer issuesCount;
+    private List<IssueMessage> issues;
+
+    private Integer pullsCount;
+
+    private List<PullMessage> pulls;
+
+    private Integer score;
+
     public PersonEntity() {}
 
     public String getName() {
@@ -56,6 +65,46 @@ public class PersonEntity {
 
     public void setComments(List<MessageEntity> comments) {
         this.comments = comments;
+    }
+
+    public List<IssueMessage> getIssues() {
+        return issues;
+    }
+
+    public void setIssues(List<IssueMessage> issues) {
+        this.issues = issues;
+    }
+
+    public List<PullMessage> getPulls() {
+        return pulls;
+    }
+
+    public void setPulls(List<PullMessage> pulls) {
+        this.pulls = pulls;
+    }
+
+    public Integer getIssuesCount() {
+        return issuesCount;
+    }
+
+    public void setIssuesCount(Integer issuesCount) {
+        this.issuesCount = issuesCount;
+    }
+
+    public Integer getPullsCount() {
+        return pullsCount;
+    }
+
+    public void setPullsCount(Integer pullsCount) {
+        this.pullsCount = pullsCount;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
     }
 
     public PersonEntity(String name, Integer commitsCount, List<MessageEntity> commits) {
