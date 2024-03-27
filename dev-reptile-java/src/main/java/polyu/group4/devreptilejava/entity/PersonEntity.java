@@ -11,7 +11,10 @@ import java.util.Map;
 public class PersonEntity {
     private String name;
     private Integer commitsCount;
-    private List<MessageEntity> messages;
+    private List<MessageEntity> commits;
+
+    private Integer commentsCount;
+    private List<MessageEntity> comments;
 
     public PersonEntity() {}
 
@@ -31,17 +34,40 @@ public class PersonEntity {
         this.commitsCount = commitsCount;
     }
 
-    public List<MessageEntity> getMessages() {
-        return messages;
+    public List<MessageEntity> getCommits() {
+        return commits;
     }
 
-    public void setMessages(List<MessageEntity> messages) {
-        this.messages = messages;
+    public void setCommits(List<MessageEntity> commits) {
+        this.commits = commits;
     }
 
-    public PersonEntity(String name, Integer commitsCount, List<MessageEntity> messages) {
+    public Integer getCommentsCount() {
+        return commentsCount;
+    }
+
+    public void setCommentsCount(Integer commentsCount) {
+        this.commentsCount = commentsCount;
+    }
+
+    public List<MessageEntity> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<MessageEntity> comments) {
+        this.comments = comments;
+    }
+
+    public PersonEntity(String name, Integer commitsCount, List<MessageEntity> commits) {
         this.name = name;
         this.commitsCount = commitsCount;
-        this.messages = messages;
+        this.commits = commits;
+    }
+
+    public PersonEntity(String name, Integer commitsCount, List<MessageEntity> commits, List<MessageEntity> comments) {
+        this.name = name;
+        this.commitsCount = commitsCount;
+        this.commits = commits;
+        this.comments = comments;
     }
 }

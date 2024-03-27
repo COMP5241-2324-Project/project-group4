@@ -23,7 +23,7 @@ public class GroupServiceImpl implements GroupService {
     // 替换GitHub 的组织名，令牌，仓库
     private String orgName = "COMP5241-2324-Project";
     private String reposName = "project-group4";
-    private String url = "https://api.github.com/repos/" + orgName + "/" + reposName + "/commits";
+    private String url = "https://api.github.com/repos/" + orgName + "/" + reposName;
 
 
     @Override
@@ -35,7 +35,7 @@ public class GroupServiceImpl implements GroupService {
         // 创建一个ObjectMapper来解析JSON数据
         ObjectMapper mapper = new ObjectMapper();
         for (String name : branchName) {
-            String branchUrl = "https://api.github.com/repos/" + orgName + "/" +reposName + "/commits?sha="+ name;
+            String branchUrl = "https://api.github.com/repos/" + orgName + "/" + reposName + "/commits?sha=" + name;
             try (CloseableHttpClient client = HttpClients.createDefault()) {
                 // 创建一个HttpGet请求，用于获取仓库的提交信息
                 HttpGet request = new HttpGet(branchUrl);
@@ -62,7 +62,7 @@ public class GroupServiceImpl implements GroupService {
                             if (!"github-classroom[bot]".equals(authorName)) {
                                 // 如果已经有了该author，那么则仅需要更新message列表，和增加commit次数
                                 if (null != person) {
-                                    person.getMessages().add(newCommit);
+                                    person.getCommits().add(newCommit);
                                     person.setCommitsCount(person.getCommitsCount() + 1);
                                 } else {
                                     // 如果没有该author，那么则需要在Map中放入
@@ -79,6 +79,54 @@ public class GroupServiceImpl implements GroupService {
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
+        }
+        return commitsJson;
+    }
+
+    @Override
+    public String getGroupComments() {
+        String commitsJson = null;
+        // 创建一个Map来存储人名和对应的entity
+        Map<String, PersonEntity> commentPerson = new HashMap<String, PersonEntity>();
+        // 创建一个ObjectMapper来解析JSON数据
+        ObjectMapper mapper = new ObjectMapper();
+        String commentUrl = url + "/issues/comments";
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            // 创建一个HttpGet请求，用于获取仓库的提交信息
+            HttpGet request = new HttpGet(commentUrl);
+            try (CloseableHttpResponse response = client.execute(request)) {
+                String responseBody = EntityUtils.toString(response.getEntity());
+                List<Map<String, Object>> comments = mapper.readValue(responseBody, List.class);
+                for (Map<String, Object> comment : comments) {
+                    Map<String, Object> commentUser = (Map<String, Object>) comment.get("user");
+                    if (commentUser != null) {
+                        String name = (String) commentUser.get("login");
+                        String message = (String) comment.get("body");
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                        Date commitDate = formatter.parse((String) comment.get("updated_at"));
+                        // 将活动信息和活动时间放入Entity中
+                        MessageEntity newComment = new MessageEntity(message, commitDate);
+                        // 判断当前Map中是否已经有了该author
+                        PersonEntity person = commentPerson.get(name);
+                        if (null != person) {
+                            person.getComments().add(newComment);
+                            person.setCommentsCount(person.getCommentsCount() + 1);
+                        } else {
+                            // 如果没有该author，那么则需要在Map中放入
+                            List<MessageEntity> messageList = new ArrayList<MessageEntity>();
+                            messageList.add(newComment);
+                            PersonEntity newPerson = new PersonEntity();
+                            newPerson.setName(name);
+                            newPerson.setComments(messageList);
+                            newPerson.setCommentsCount(1);
+                            commentPerson.put(name, newPerson);
+                        }
+                    }
+                }
+                commitsJson = mapper.writeValueAsString(commentPerson);
+            }
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
         }
         return commitsJson;
     }
@@ -101,9 +149,5 @@ public class GroupServiceImpl implements GroupService {
             throw new RuntimeException(e);
         }
         return branchName;
-    }
-
-
-    public void test() {
     }
 }

@@ -14,12 +14,12 @@ public class GroupController {
     private GroupService groupService;
 
     @GetMapping("/commits")
+    // 返回小组成员的commits
     public String getGroupCommits(){
         return groupService.getGroupCommits();
     }
 
-    @GetMapping("/test")
-    public void getAllBranchUrls(){
-        groupService.test();
-    }
+    @GetMapping("/comments")
+    // 返回小组成员的comments
+    public String getGroupComments(){return groupService.getGroupComments();}
 }

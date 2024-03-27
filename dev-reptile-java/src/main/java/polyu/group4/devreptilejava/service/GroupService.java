@@ -6,5 +6,5 @@ import java.util.List;
 public interface GroupService {
     String getGroupCommits();
 
-    void test();
+    String getGroupComments();
 }
