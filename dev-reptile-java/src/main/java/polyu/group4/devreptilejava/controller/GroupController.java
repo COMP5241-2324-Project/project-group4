@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import polyu.group4.devreptilejava.service.impl.GroupService;
+import polyu.group4.devreptilejava.service.GroupService;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -13,11 +13,7 @@ public class GroupController {
     @Autowired
     private GroupService groupService;
 
-//    第三步，模仿下面的两行写两行
-    @GetMapping("/commits")
-    public String getGroupCommits(){
-        return groupService.getGroupCommits();
-    }
+<<<<<<< HEAD
     @GetMapping("/issues")
     public String getGroupIssues(){return groupService.getGroupIssues(); }
     @GetMapping("/pulls")
@@ -26,4 +22,15 @@ public class GroupController {
     public String getGroupMilestones(){return groupService.getGroupMilestones(); }
     @GetMapping("/assignees")
     public String getGroupAssignees(){return groupService.getGroupAssignees(); }
+=======
+    @GetMapping("/commits")
+    // 返回小组成员的commits
+    public String getGroupCommits(){
+        return groupService.getGroupCommits();
+    }
+
+    @GetMapping("/comments")
+    // 返回小组成员的comments
+    public String getGroupComments(){return groupService.getGroupComments();}
+>>>>>>> origin/dev-reptile-thy
 }
