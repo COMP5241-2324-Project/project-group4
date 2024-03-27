@@ -1,0 +1,15 @@
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}
+.mr-bottom-10 {
+  margin-bottom: 10px;
+}
+.pd-bottom-20 {
+  padding-bottom: 20px;
+}
