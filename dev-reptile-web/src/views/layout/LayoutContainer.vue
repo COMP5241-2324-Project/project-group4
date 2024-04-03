@@ -6,9 +6,14 @@ import {
   List,
   Document
 } from '@element-plus/icons-vue'
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
+import { useActStore } from '@/store/activity'
+import { watch, ref } from 'vue'
+
+const actId = ref(1)
+const store = useActStore()
+store.$subscribe((mutation, state) => {
+  actId.value = store.index
+})
 
 </script>
 
@@ -36,7 +41,7 @@ const router = useRouter()
           </el-icon>
           <span>Report</span>
         </el-menu-item>
-        <el-menu-item index="/teams/team1">
+        <el-menu-item :index="`/teams/team4/${actId}`">
           <el-icon>
             <Management />
           </el-icon>
@@ -53,7 +58,6 @@ const router = useRouter()
       <el-main>
         <router-view></router-view>
       </el-main>
-      <!-- <el-footer>大事件 ©2023 Created by 黑马程序员</el-footer> -->
     </el-container>
   </el-container>
 </template>
