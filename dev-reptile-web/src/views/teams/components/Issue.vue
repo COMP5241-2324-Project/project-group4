@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onBeforeMount } from 'vue'
-import { getCommits } from '@/api/index'
+import { getIssues } from '@/api/index'
 import { convertTimestamp, objectValuesToArray } from '@/utils/format'
 
 const avatar = ref({
@@ -11,30 +11,31 @@ const list = ref([])
 
 const buildList = array => {
   const len = array.length
-  let name, commitsCount, commits
+  let name, issuesCount, issues
   for (let i = 0; i < len; ++i) {
     name = array[i].name
-    commitsCount = array[i].commitsCount
-    commits = array[i].commits
-    for (let j = 0; j < commitsCount; ++j) {
+    issuesCount = array[i].issuesCount
+    issues = array[i].issues
+    for (let j = 0; j < issuesCount; ++j) {
       list.value.push({
         name,
-        message: commits[j].message,
-        date: convertTimestamp(commits[j].date)
+        title: issues[j].title || 'no title',
+        message: issues[j].message || 'no message',
+        date: convertTimestamp(issues[j].date)
       })
     }
   }
   list.value.sort((a, b) => new Date(b.date) - new Date(a.date))
 }
 
-const getGithubCommits = async () => {
-  let obj = await getCommits()
+const getGithubIssues = async () => {
+  let obj = await getIssues()
   let data = objectValuesToArray(obj)
   buildList(data)
 }
 
 onBeforeMount(async () => {
-  getGithubCommits()
+  getGithubIssues()
 })
 
 
@@ -44,7 +45,7 @@ onBeforeMount(async () => {
   <el-card style="width: 65%; margin-top: 20px; height: 500px; overflow-y: scroll;">
     <template #header>
       <div class="card-header">
-        <span>Commit Frequency</span>
+        <span>Issues</span>
       </div>
     </template>
     <div class="card-body">
@@ -53,7 +54,8 @@ onBeforeMount(async () => {
           <el-avatar :size="32" :src="avatar.circleUrl" />
           <div style="display: flex; flex-direction: column; flex: 1;">
             <div class="card-body-item-name">{{ item.name }}</div>
-            <div class="card-body-item-message">{{ item.message }}</div>
+            <div class="card-body-item-title"><strong>title</strong>: {{ item.title }}</div>
+            <div class="card-body-item-message"><strong>message</strong>: {{ item.message }}</div>
           </div>
           <div class="card-body-item-date">{{ item.date }}</div>
         </div>
@@ -82,6 +84,12 @@ onBeforeMount(async () => {
       color: #262626;
       font-size: 14px;
       margin-top: 16px;
+    }
+
+    &-title {
+      color: #8C8C8C;
+      font-size: 12px;
+      margin-top: 10px;
     }
 
     &-message {

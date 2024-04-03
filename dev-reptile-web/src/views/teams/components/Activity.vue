@@ -1,14 +1,22 @@
 <script setup>
 import { ref } from 'vue'
+import { useActStore } from '@/store/activity'
 
 const activities = ref([
-  { activity: 'Commit Frequency', action: 'Update README.md', studentName: 'ZHANG Yi', time: '2 days ago' },
-  { activity: 'Issues', action: 'Update README.md', studentName: 'ZHANG Yi', time: '2 days ago' },
-  { activity: 'Pull Requests', action: 'Update README.md', studentName: 'ZHANG Yi', time: '2 days ago' },
-  { activity: 'Discussion/Comments', action: 'Update README.md', studentName: 'ZHANG Yi', time: '2 days ago' },
-  { activity: 'Project Board', action: 'Update README.md', studentName: 'ZHANG Yi', time: '2 days ago' },
-  { activity: 'Tasks Completion', action: 'Update README.md', studentName: 'ZHANG Yi', time: '2 days ago' }
+  { activity: 'Commit Frequency', action: 'Update README.md', studentName: 'Haoyun-PolyU', time: '2024-03-18 12:50:11' },
+  { activity: 'Issues', action: 'About the commit method', studentName: 'Haoyun-PolyU', time: '2024-03-26 20:08:20' },
+  { activity: 'Pull Requests', action: 'Apply for merger', studentName: 'Haoyun-PolyU', time: '2024-03-27 13:11:39' },
+  { activity: 'Discussion/Comments', action: 'I think we may ...', studentName: 'Haoyun-PolyU', time: '2024-03-26 15:46:41' },
+  { activity: 'Milestone', action: 'Configure the basic backend', studentName: 'Andy-King2', time: '2024-03-27 03:24:25' },
+  { activity: 'Members Contribution', action: 'frontend development', studentName: 'Gangplank85', time: '2024-03-27 13:04:20' }
 ])
+
+
+const store = useActStore()
+
+const toggle = index => {
+  store.index = index + 1
+}
 
 </script>
 
@@ -20,14 +28,15 @@ const activities = ref([
       </div>
     </template>
     <div class="card-body">
-      <div class="card-body-item" v-for="(item, index) in activities" :key="item.activity">
+      <router-link class="card-body-item" v-for="(item, index) in activities" :key="item.activity"
+        :to="`/teams/team4/${index + 1}`" @click="toggle(index)">
         <div class="card-body-item-activity">{{ item.activity }}</div>
         <div class="card-body-item-action">{{ item.action }}</div>
         <div style="display: flex;justify-content: space-between;">
           <div class="card-body-item-studentname">{{ item.studentName }}</div>
           <div class="card-body-item-time">{{ item.time }}</div>
         </div>
-      </div>
+      </router-link>
     </div>
   </el-card>
 </template>
@@ -50,6 +59,7 @@ const activities = ref([
   flex-wrap: wrap;
 
   &-item {
+    cursor: pointer;
     border: .5px solid #E2E2E2;
     width: 33.33%;
     // height: 200px;

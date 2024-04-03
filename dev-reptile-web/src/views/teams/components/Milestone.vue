@@ -1,40 +1,43 @@
 <script setup>
 import { ref, onBeforeMount } from 'vue'
-import { getCommits } from '@/api/index'
-import { convertTimestamp, objectValuesToArray } from '@/utils/format'
+import { getMilestone } from '@/api/index'
 
 const avatar = ref({
   circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 })
 
+function formatDateTime(dateStr) {
+  const date = new Date(dateStr);
+  return date.toLocaleString('zh-CN', { hour12: false });
+}
+
 const list = ref([])
 
 const buildList = array => {
   const len = array.length
-  let name, commitsCount, commits
+  let name, desc, date, title
   for (let i = 0; i < len; ++i) {
-    name = array[i].name
-    commitsCount = array[i].commitsCount
-    commits = array[i].commits
-    for (let j = 0; j < commitsCount; ++j) {
-      list.value.push({
-        name,
-        message: commits[j].message,
-        date: convertTimestamp(commits[j].date)
-      })
-    }
+    name = array[i]['creator.login']
+    desc = array[i].description
+    title = array[i].title
+    date = array[i].created_at
+    list.value.push({
+      name,
+      title: title || 'no title',
+      desc: desc || 'no message',
+      date: formatDateTime(date)
+    })
   }
   list.value.sort((a, b) => new Date(b.date) - new Date(a.date))
 }
 
-const getGithubCommits = async () => {
-  let obj = await getCommits()
-  let data = objectValuesToArray(obj)
-  buildList(data)
+const getGithubMilestone = async () => {
+  let array = await getMilestone()
+  buildList(array)
 }
 
 onBeforeMount(async () => {
-  getGithubCommits()
+  getGithubMilestone()
 })
 
 
@@ -44,7 +47,7 @@ onBeforeMount(async () => {
   <el-card style="width: 65%; margin-top: 20px; height: 500px; overflow-y: scroll;">
     <template #header>
       <div class="card-header">
-        <span>Commit Frequency</span>
+        <span>Milestone</span>
       </div>
     </template>
     <div class="card-body">
@@ -53,7 +56,8 @@ onBeforeMount(async () => {
           <el-avatar :size="32" :src="avatar.circleUrl" />
           <div style="display: flex; flex-direction: column; flex: 1;">
             <div class="card-body-item-name">{{ item.name }}</div>
-            <div class="card-body-item-message">{{ item.message }}</div>
+            <div class="card-body-item-title"><strong>title</strong>: {{ item.title }}</div>
+            <div class="card-body-item-message"><strong>desc</strong>: {{ item.desc }}</div>
           </div>
           <div class="card-body-item-date">{{ item.date }}</div>
         </div>
@@ -82,6 +86,12 @@ onBeforeMount(async () => {
       color: #262626;
       font-size: 14px;
       margin-top: 16px;
+    }
+
+    &-title {
+      color: #8C8C8C;
+      font-size: 12px;
+      margin-top: 10px;
     }
 
     &-message {

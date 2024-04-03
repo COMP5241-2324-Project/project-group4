@@ -1,18 +1,41 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onBeforeMount, onMounted } from 'vue'
+import { getScore } from '@/api/index'
 import useEchart from '@/utils/useEchart'
 import '@/style.css'
+import { objectValuesToArray } from '@/utils/format'
 
-const echartData = ref([
-  8, 5, 9, 5, 8, 4
-])
+const echartData = ref([])
+
+const buildEchart = array => {
+  const len = array.length
+  let commitsCount = 0,
+    commentsCount = 0,
+    issuesCount = 0,
+    pullsCount = 0
+  for (let i = 0; i < len; ++i) {
+    commitsCount += Number(array[i].commitsCount)
+    commentsCount += Number(array[i].commentsCount)
+    issuesCount += Number(array[i].issuesCount)
+    pullsCount += Number(array[i].pullsCount)
+  }
+  echartData.value = [commitsCount, issuesCount, pullsCount, commentsCount, 10, 10]
+}
+
+const getGithubScore = async () => {
+  let obj = await getScore()
+  let data = objectValuesToArray(obj)
+  buildEchart(data)
+  setupEchart(echartData.value)
+}
+
+onBeforeMount(async () => {
+  getGithubScore()
+})
 
 let divRef = ref(null)
 let myChart = null
 
-onMounted(() => {
-  setupEchart(echartData.value)
-})
 
 const setupEchart = echartData => {
   if (!myChart) {
@@ -31,7 +54,7 @@ const getOption = echartData => {
     radar: {
       // shape: 'circle',
       indicator: [
-        { name: 'Commit Frequency', max: 10 },
+        { name: 'Commit Frequency', max: 80 },
         { name: 'Issues', max: 10 },
         { name: 'Pull Requests', max: 10 },
         { name: 'Discussion/Comments', max: 10 },
