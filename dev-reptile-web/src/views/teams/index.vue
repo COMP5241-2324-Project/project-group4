@@ -5,14 +5,22 @@ import { nanoid } from 'nanoid'
 const inputContext = ref('')
 
 const teamInfo = ref([
-  { id: nanoid(), name: 'Team1', members: 10, time: 'Just now' },
-  { id: nanoid(), name: 'Team2', members: 4, time: '2 hrs ago' },
-  { id: nanoid(), name: 'Team3', members: 5, time: '4 hrs ago' },
-  { id: nanoid(), name: 'Team4', members: 4, time: '6 hrs ago' },
-  { id: nanoid(), name: 'Team5', members: 8, time: 'Just now' },
-  { id: nanoid(), name: 'Team6', members: 8, time: 'Just now' },
-  { id: nanoid(), name: 'Team7', members: 10, time: 'Just now' },
-  { id: nanoid(), name: 'Team8', members: 10, time: 'Just now' }
+  { id: nanoid(), name: 'Team1', members: 4, time: 'Just now' },
+  { id: nanoid(), name: 'Team2', members: 6, time: '2 hrs ago' },
+  { id: nanoid(), name: 'Team3', members: 4, time: '4 hrs ago' },
+  { id: nanoid(), name: 'Team4', members: 5, time: '6 hrs ago' },
+  { id: nanoid(), name: 'Team5', members: 5, time: 'Just now' },
+  { id: nanoid(), name: 'Team6', members: 5, time: 'Just now' },
+  { id: nanoid(), name: 'Team7', members: 5, time: 'Just now' },
+  { id: nanoid(), name: 'Team8', members: 5, time: 'Just now' },
+  { id: nanoid(), name: 'Team9', members: 5, time: 'Just now' },
+  { id: nanoid(), name: 'Team10', members: 5, time: 'Just now' },
+  { id: nanoid(), name: 'Team11', members: 4, time: 'Just now' },
+  { id: nanoid(), name: 'Team12', members: 5, time: 'Just now' },
+  { id: nanoid(), name: 'Team13', members: 4, time: 'Just now' },
+  { id: nanoid(), name: 'Team14', members: 4, time: 'Just now' },
+  { id: nanoid(), name: 'Team15', members: 4, time: 'Just now' },
+  { id: nanoid(), name: 'Team16', members: 3, time: 'Just now' }
 ])
 </script>
 
@@ -32,7 +40,7 @@ const teamInfo = ref([
         <img src="@/assets/team_image.jpg" class="team-card-item-image" />
         <div class="team-card-item-name">{{ item.name }}</div>
         <div class="team-card-item-member">{{ item.members }} members</div>
-        <div class="team-card-item-time">{{ item.time }}</div>
+        <!-- <div class="team-card-item-time">{{ item.time }}</div> -->
       </div>
     </div>
   </page-container>
@@ -73,7 +81,7 @@ const teamInfo = ref([
   // justify-content: space-between;
 
   .team-card-item {
-    height: 280px;
+    height: 250px;
     width: 284px;
     background-color: #efefef;
     margin: 15px;
