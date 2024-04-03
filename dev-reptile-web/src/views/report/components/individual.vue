@@ -1,39 +1,35 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onBeforeMount } from 'vue'
+import { getScore } from '@/api/index'
 
-const tableData = ref([
-  {
-    name: 'ZHU Yuanzhang',
-    StudentID: '12344321g',
-    score: '89'
-  },
-  {
-    name: 'YING Zheng',
-    StudentID: '12344320g',
-    score: '92'
-  },
-  {
-    name: 'LIU Che',
-    StudentID: '14468321g',
-    score: '94'
-  },
-  {
-    name: 'LI Shimin',
-    StudentID: '12342009g',
-    score: '95'
-  },
-  {
-    name: 'ZHAO Kuangying',
-    StudentID: '12344391g',
-    score: '80'
-  },
-])
+
+const tableData = ref([])
 
 const cellStyle = ({ row, column, rowIndex, columnIndex }) => {
   if (columnIndex == 1) {
     return { 'color': '#1890FF' }
   }
 }
+
+const objectToArray = obj => {
+  return Object.entries(obj)
+}
+
+const getGithubScore = async () => {
+  let obj = await getScore()
+  let data = objectToArray(obj),
+    len = data.length
+  for (let i = 0; i < len; ++i) {
+    tableData.value.push({
+      name: data[i][0],
+      score: data[i][1].score
+    })
+  }
+}
+
+onBeforeMount(async () => {
+  getGithubScore()
+})
 
 
 
@@ -51,12 +47,11 @@ const cellStyle = ({ row, column, rowIndex, columnIndex }) => {
       <el-table :data="tableData" border style="width: 90%" :cell-style="cellStyle">
         <el-table-column type="index" label="Rank" width="80" />
         <el-table-column prop="name" label="Name" />
-        <el-table-column prop="StudentID" sortable label="StudentID" />
         <el-table-column prop="score" sortable label="Score" />
       </el-table>
-      <div class="card-body-pagination">
+      <!-- <div class="card-body-pagination">
         <el-pagination layout="prev, pager, next" :total="50" />
-      </div>
+      </div> -->
     </div>
 
   </el-card>
