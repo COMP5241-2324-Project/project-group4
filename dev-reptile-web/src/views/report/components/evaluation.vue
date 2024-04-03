@@ -76,7 +76,7 @@ const getOption = pieDatas => {
     series: [
       {
         type: 'pie',
-        center: ['25%', '40%'],
+        center: ['25%', '45%'],
         radius: ['40%', '80%'],
         data: data,
         label: {
