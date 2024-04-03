@@ -19,3 +19,5 @@ export const convertTimestamp = (timestamp) => {
 
   return formattedDate;
 }
+
+export const objectValuesToArray = obj => Object.values(obj)
