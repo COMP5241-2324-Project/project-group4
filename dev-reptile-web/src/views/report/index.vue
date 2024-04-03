@@ -3,29 +3,12 @@ import { ref } from 'vue'
 import Total from './components/total.vue'
 import Individual from './components/individual.vue'
 import Evaluation from './components/evaluation.vue'
-const activeName = ref('first')
-
-const handleClick = (tab, event) => {
-  console.log(tab, event)
-}
 </script>
 
 <template>
   <div>
     <page-container title="">
-      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-        <el-tab-pane label="Total" name="first">
-          <Total />
-        </el-tab-pane>
-        <el-tab-pane label="Commit" name="second">Config</el-tab-pane>
-        <el-tab-pane label="Issues" name="third">Role</el-tab-pane>
-        <el-tab-pane label="Pull Requests" name="fourth">Task</el-tab-pane>
-        <el-tab-pane label="Comments" name="fifth">Task</el-tab-pane>
-        <el-tab-pane label="Project Board" name="sixth">Task</el-tab-pane>
-        <el-tab-pane label="Tasks Completion" name="seventh">Task</el-tab-pane>
-      </el-tabs>
-
-      <!-- <Individual /> -->
+      <Total />
     </page-container>
 
     <div style="display: flex; justify-content: space-between;">
@@ -37,7 +20,7 @@ const handleClick = (tab, event) => {
 
 <style lang="scss" scoped>
 .page-container {
-  min-height: 478px;
+  min-height: 400px;
 }
 
 :deep() {
