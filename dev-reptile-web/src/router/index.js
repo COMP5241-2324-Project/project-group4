@@ -11,7 +11,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // { path: '/login', component: () => import('@/views/login/LoginPage.vue') }, // 登录页
     {
       path: '/',
       component: () => import('@/views/layout/LayoutContainer.vue'),
@@ -26,8 +25,35 @@ const router = createRouter({
           component: () => import('@/views/teams/index.vue')
         },
         {
-          path: '/teams/team1',
-          component: () => import('@/views/teams/team1.vue')
+          path: '/teams/team4',
+          component: () => import('@/views/teams/team4.vue'),
+          redirect: 'teams/team4/1',
+          children: [
+            {
+              path: '1',
+              component: () => import('@/views/teams/components/Commit.vue')
+            },
+            {
+              path: '2',
+              component: () => import('@/views/teams/components/Issue.vue')
+            },
+            {
+              path: '3',
+              component: () => import('@/views/teams/components/Pull.vue')
+            },
+            {
+              path: '4',
+              component: () => import('@/views/teams/components/Comment.vue')
+            },
+            {
+              path: '5',
+              component: () => import('@/views/teams/components/Milestone.vue')
+            },
+            {
+              path: '6',
+              component: () => import('@/views/teams/components/Completion.vue')
+            },
+          ]
         },
         {
           path: '/report/index',
