@@ -2,22 +2,21 @@
 import { ref } from 'vue'
 import Activity from './components/Activity.vue'
 import ActivityIndex from './components/ActivityIndex.vue'
-import Commit from './components/Commit.vue'
 import GenAI from './components/GenAI.vue'
 
 const studentList = ref([
-  { name: 'ZHANG Yi', stuId: '17863092g' },
-  { name: 'ZHANG Er', stuId: '17863092g' },
-  { name: 'ZHANG San', stuId: '17863092g' },
-  { name: 'ZHANG Si', stuId: '17863092g' },
-  { name: 'ZHANG Wu', stuId: '17863092g' }
+  { name: 'CHEN Meiqi', stuId: '23070239g' },
+  { name: 'JIN Zhendong', stuId: '23071754g' },
+  { name: 'TAO Haoyuan', stuId: '23047513g' },
+  { name: 'WANG Shuojing', stuId: '23068492g' },
+  { name: 'WANG Xinnan', stuId: '23057146g' }
 ])
 </script>
 
 <template>
   <div>
     <page-container title="">
-      <div class="team-title">Team1</div>
+      <div class="team-title">Team4</div>
       <div class="team-content">
         <div class="team-content-list">
           <div class="student-list" v-for="(item, index) in studentList" :key="item.name">
@@ -25,20 +24,20 @@ const studentList = ref([
           </div>
         </div>
         <div class="team-content-indicator">
-          <div class="stat">
+          <!-- <div class="stat">
             <div class="stat-name">Files</div>
             <div class="stat-number">56</div>
-          </div>
-          <el-divider direction="vertical" />
+          </div> -->
+          <!-- <el-divider direction="vertical" /> -->
           <div class="stat">
             <div class="stat-name">Team Ranking</div>
-            <div class="stat-number">3/8</div>
+            <div class="stat-number">4/16</div>
           </div>
-          <el-divider direction="vertical" />
+          <!-- <el-divider direction="vertical" />
           <div class="stat">
             <div class="stat-name">Project Visits</div>
             <div class="stat-number">233</div>
-          </div>
+          </div> -->
         </div>
 
       </div>
@@ -48,7 +47,7 @@ const studentList = ref([
       <ActivityIndex />
     </div>
     <div style="display: flex; justify-content: space-between;">
-      <Commit />
+      <router-view></router-view>
       <GenAI />
     </div>
   </div>
@@ -85,7 +84,7 @@ const studentList = ref([
   }
 
   &-indicator {
-    width: 400px;
+    width: 200px;
     height: 64px;
     display: flex;
 
