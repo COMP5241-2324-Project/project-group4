@@ -21,5 +21,16 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api/': {
+        // target: 'http://localhost:8080/',
+        target: 'https://dev.usemock.com/660a84b9e68d0b714e3544d3/',
+        changeOrigin: true, // 表示开启代理, 允许跨域请求数据
+        secure: true
+      }
+    }
   }
 })
