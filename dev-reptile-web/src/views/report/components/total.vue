@@ -1,19 +1,30 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeMount } from 'vue'
 import useEchart from '@/utils/useEchart'
+
+const array = ref([])
+const generateRandomArray = () => {
+  var arr = []
+  for (var i = 0; i < 16; i++) {
+    var randomNum = Math.floor(Math.random() * 101) + 100
+    arr.push(randomNum)
+  }
+  return arr
+}
 
 const divRef = ref(null)
 let myChart = null
 
-const setupEchart = () => {
+const setupEchart = array => {
   if (!myChart) {
     myChart = useEchart(divRef.value)
   }
-  let option = getOption()
+
+  let option = getOption(array)
   myChart.setOption(option)
 }
 
-const getOption = () => {
+const getOption = array => {
   return {
     backgroundColor: '#EEF0F2',
     legend: {
@@ -30,8 +41,9 @@ const getOption = () => {
     series: [
       {
         name: 'score',
-        data: [120, 200, 150, 80, 70, 110, 130, 140, 120, 90, 180, 170, 140, 120, 79, 97],
+        data: array,
         type: 'bar',
+        barWidth: 40
         // showBackground: true,
         // backgroundStyle: {
         //   color: 'rgba(180, 180, 180, 0.2)'
@@ -47,20 +59,29 @@ const getOption = () => {
   }
 }
 
-onMounted(() => {
-  setupEchart()
+onBeforeMount(() => {
+  array.value = generateRandomArray()
+  buildRankingList(array.value)
 })
 
-const rankingList = ref([
-  { no: 1, name: 'Team1', score: 323232 },
-  { no: 2, name: 'Team2', score: 323232 },
-  { no: 3, name: 'Team3', score: 323232 },
-  { no: 4, name: 'Team4', score: 323232 },
-  { no: 5, name: 'Team5', score: 323232 },
-  { no: 6, name: 'Team6', score: 323232 },
-  { no: 7, name: 'Team7', score: 323232 },
-  { no: 8, name: 'Team8', score: 323232 }
-])
+onMounted(() => {
+  setupEchart(array.value)
+})
+
+const buildRankingList = array => {
+  const len = array.length
+  for (let i = 0; i < len; ++i) {
+    rankingList.value.push({
+      name: `Team${i + 1}`,
+      score: array[i]
+    })
+  }
+  rankingList.value.sort((a, b) => b.score - a.score)
+  rankingList.value.splice(8, 8)
+  console.log(rankingList.value)
+}
+
+const rankingList = ref([])
 
 </script>
 
@@ -75,8 +96,8 @@ const rankingList = ref([
     <div class="ranking">
       <div class="ranking-title">Teams Ranking</div>
       <div class="ranking-list">
-        <div class="ranking-list-item" v-for="(item, index) in rankingList" :key="item.no">
-          <div class="ranking-list-item-number">{{ item.no }}</div>
+        <div class="ranking-list-item" v-for="(item, index) in rankingList" :key="index">
+          <div class="ranking-list-item-number">{{ index + 1 }}</div>
           <div class="ranking-list-item-name">{{ item.name }}</div>
           <div class="ranking-list-item-score">{{ item.score }}</div>
         </div>
@@ -99,7 +120,7 @@ const rankingList = ref([
   }
 
   &-columns {
-    margin: 40px 60px 40px 0;
+    margin: 40px 30px 40px 0;
   }
 }
 
@@ -130,11 +151,12 @@ const rankingList = ref([
       }
 
       &-name {
-        margin-right: 40px;
+        margin-right: 20px;
+        width: 60px;
       }
 
       &-score {
-        margin-right: 80px;
+        margin-right: 40px;
       }
     }
   }
